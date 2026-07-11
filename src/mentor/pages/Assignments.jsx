@@ -14,19 +14,12 @@ import { formatRelative } from '../../lib/utils';
 const STATUS_VARIANT = { TODO: 'default', IN_PROGRESS: 'warning', REVIEW: 'default', DONE: 'success', BLOCKED: 'danger' };
 
 const Assignments = () => {
-  const [projects, setProjects] = useState([]);
+  const [projects] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalTask, setModalTask] = useState(null);
-
-  useEffect(() => {
-    api.get('/projects', { params: { limit: 50 } })
-      .then((r) => { setProjects(r.data.items); if (r.data.items[0]) setActiveId(r.data.items[0].id); })
-      .catch(() => notify.error('Failed to load projects'))
-      .finally(() => setLoading(false));
-  }, []);
 
   const loadProject = useCallback(async () => {
     if (!activeId) return;
@@ -42,7 +35,13 @@ const Assignments = () => {
     setLoading(false);
   }, [activeId]);
 
-  useEffect(() => { loadProject(); }, [loadProject]);
+  useEffect(() => {
+  const run = async () => {
+    await loadProject();
+  };
+
+  run();
+}, [loadProject]);
 
   const interns = (project?.interns || []).map((i) => i.user).filter(Boolean);
 
